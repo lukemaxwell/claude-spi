@@ -1,0 +1,8 @@
+{
+  "name": "spi",
+  "description": "Spec → Plan → Issues: turn a feature description into a completed spec and GitHub issues in one command.",
+  "version": "1.0.0",
+  "author": {
+    "name": "lukemaxwell"
+  }
+}
