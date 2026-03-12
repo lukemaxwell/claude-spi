@@ -78,4 +78,6 @@ gh issue list --state open --limit 50
 - Every requirement in the spec maps to at least one issue
 - Every issue has at least one acceptance criterion and one test plan step
 - If `gh` is unavailable, print formatted issue bodies for manual creation
-- Ask before overwriting an existing SPEC.md
+- Write specs to `specs/{slug}.md` — never overwrite, append `-2` on collision
+- Specs accumulate in `specs/` so agents can scan project history before starting new work
+- Include `Spec: specs/{slug}.md` in every issue body for back-linking

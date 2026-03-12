@@ -1,7 +1,7 @@
 ---
-description: Spec → Plan → Issues for a feature. Generates SPEC.md and creates GitHub issues.
+description: Spec → Plan → Issues for a feature. Writes specs/<slug>.md into the repo and creates GitHub issues.
 argument-hint: <feature description>
-allowed-tools: [Read, Write, Glob, Grep, Bash(gh issue create:*), Bash(gh issue list:*), Bash(gh label list:*), Bash(gh label create:*), Bash(gh repo view:*), Bash(git rev-parse:*), Bash(git branch:*)]
+allowed-tools: [Read, Write, Glob, Grep, Bash(gh issue create:*), Bash(gh issue list:*), Bash(gh label list:*), Bash(gh label create:*), Bash(gh repo view:*), Bash(git rev-parse:*), Bash(git branch:*), Bash(mkdir:*)]
 ---
 
 # SPI — Spec · Plan · Issues
@@ -84,11 +84,18 @@ Wait for confirmation or edits before proceeding.
 
 ---
 
-## Phase 3 — Write SPEC.md
+## Phase 3 — Write spec to `specs/`
 
-Once confirmed, write the spec to `SPEC.md` in the current directory (or a path the user specifies).
+Once confirmed:
 
-Use the Write tool.
+1. Derive a filename slug from the spec title: lowercase, spaces → hyphens, strip punctuation.
+   Example: "CSV export for account page" → `csv-export-for-account-page`
+2. Create the `specs/` directory if it doesn't exist: `mkdir -p specs`
+3. Write the spec to `specs/{slug}.md` using the Write tool.
+
+Specs accumulate in `specs/` over time. Agents scan this directory to understand project
+direction and past decisions before starting new work. Never overwrite an existing spec
+file — append a `-2` suffix if the slug collides.
 
 ---
 
@@ -125,6 +132,8 @@ Spec: {link or title of parent spec}
 
 If `gh` is not available or the directory is not a GitHub repo, print the issue titles and bodies to the terminal instead and tell the user to create them manually.
 
+Include the path to the spec file in each issue body under **Context**: `Spec: specs/{slug}.md`
+
 ---
 
 ## Phase 5 — Summary
@@ -136,12 +145,12 @@ Print a summary table:
 | 1 | {title} | {url} |
 | … | … | … |
 
-Then: "SPEC.md written ✓  {N} issues created ✓"
+Then: "`specs/{slug}.md` written ✓  {N} issues created ✓"
 
 ---
 
 ## Error handling
 
 - If `gh issue create` fails for an individual issue, continue with the rest, then list all failures at the end.
-- If SPEC.md already exists, ask before overwriting.
+- Never overwrite an existing spec file — append `-2`, `-3` etc. if the slug collides.
 - Never silently skip an issue.

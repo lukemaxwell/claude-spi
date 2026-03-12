@@ -50,7 +50,7 @@ Five steps, one command:
 SPI asks a couple of clarifying questions (max row count? which fields? auth required?), drafts a spec, waits for your OK, then creates:
 
 ```
-✓ SPEC.md written
+✓ specs/csv-export-account-page.md written
 
 #  Issue                                      URL
 1  Add CSV export endpoint to account API     github.com/you/app/issues/42
@@ -58,6 +58,10 @@ SPI asks a couple of clarifying questions (max row count? which fields? auth req
 3  Add rate limiting to export endpoint       github.com/you/app/issues/44
 4  Write integration tests for CSV export     github.com/you/app/issues/45
 ```
+
+Specs accumulate in `specs/` over time. Any agent — in any future session — can scan that
+directory to understand what has been built, why decisions were made, and where the project
+is headed before starting new work.
 
 ---
 

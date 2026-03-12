@@ -10,5 +10,5 @@
 - [ ] <how to verify — manual step or automated check>
 
 ## Context
-Spec: <link or title of parent SPEC.md>
+Spec: specs/<slug>.md
 Related issues: <#number or N/A>
