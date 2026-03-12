@@ -22,6 +22,7 @@ When you give an AI agent a well-structured spec and a numbered issue backlog, e
 - Each issue is a discrete, self-contained unit of work with acceptance criteria
 - You can hand off to any agent, pause, resume, or swap tools — the context is in GitHub
 - Reviews are easier because the intent is documented before the code exists
+- Specs accumulate in `specs/` — a permanent record any agent can read to understand project history, past decisions, and direction before starting new work
 
 **Spec-driven AI development** is the pattern that makes Claude Code, OpenClaw, and similar tools production-grade.
 
@@ -115,6 +116,7 @@ Because the spec existed before the code, PR review is a diff against stated int
 | Hard to pause/resume/hand off | Context lives in GitHub, not a chat window |
 | PR review requires reconstructing intent | Intent is documented in the spec and issue |
 | One agent, one session | Any agent, any session, any tool |
+| Agent starts each session blind to project history | `specs/` gives every agent a full record of what was built and why |
 
 ---
 
