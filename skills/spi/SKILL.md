@@ -203,9 +203,17 @@ dart format --set-exit-if-changed . # must be clean
 
 If tests fail or analyze has issues, fix them before moving on. Do not skip to the next issue with a broken build.
 
-#### 4c. Code review
+#### 4c. Code review (MANDATORY — do not skip)
 
-Run the code-reviewer agent on the changed files. Address any CRITICAL or HIGH findings before creating the PR. Note MEDIUM findings in the PR body.
+**You must run the code-reviewer agent before creating the PR.** This is a hard gate, not optional.
+
+Spawn the `code-reviewer` agent with the list of changed files (`git diff main...HEAD --name-only`). Wait for it to complete.
+
+- **CRITICAL or HIGH findings** — fix them before proceeding. Do not create the PR until they are resolved. Re-run the reviewer after fixing.
+- **MEDIUM findings** — include them verbatim in the PR body under a "Code review notes" section.
+- **LOW / INFO findings** — may be ignored.
+
+If you skip this step, you are violating the workflow. There are no exceptions.
 
 #### 4d. Rebase and create PR
 
@@ -273,6 +281,7 @@ Conflict rebases needed after merging:
 
 - **Never push to main.** Branch → PR only.
 - **Never skip a failing build.** Fix before moving to the next issue.
+- **Never skip code review.** Run the code-reviewer agent after every implementation. Fix CRITICAL/HIGH before creating the PR.
 - **One PR per issue.** Each PR must close exactly one issue.
 - **Always cut from main.** Even if an issue conflicts with a predecessor, branch from `main` — not from the predecessor's branch. The developer merges and rebases in the right order.
 - **Tests first.** No implementation before there are failing tests that prove the behaviour doesn't exist yet.
