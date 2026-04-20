@@ -5,11 +5,11 @@ description: >
   create GitHub issues from a description, or when they say "SPI", "spec this out",
   "create a spec", "write up issues for", "plan this feature", "spec and issues",
   or "turn this into issues". Guides the Spec → Plan → Issues workflow: draft a structured
-  spec from a description, confirm it with the user, write SPEC.md, then create GitHub
-  issues for each item in the breakdown using `gh issue create`.
+  spec from a description, confirm it with the user, write SPEC.md, create GitHub
+  issues for each item in the breakdown, and create a GitHub Project to track them.
   Also handles "/spi go" — autonomous implementation of all open issues using TDD,
   with conflict-safe branching, code review, and PR creation.
-version: 1.1.0
+version: 1.2.0
 ---
 
 # SPI — Spec · Plan · Issues
@@ -26,7 +26,8 @@ GitHub issues, ready to pick up and work.
      ├─ Phase 2: Draft spec (fill spec template, show to user, wait for OK)
      ├─ Phase 3: Write SPEC.md
      ├─ Phase 4: Create GitHub issues via `gh issue create`
-     └─ Phase 5: Print summary table
+     ├─ Phase 5: Create GitHub Project + add all issues to it
+     └─ Phase 6: Print summary table
 ```
 
 ## When to invoke proactively
@@ -72,7 +73,47 @@ gh issue create --title "..." --body "..."
 
 # List existing issues (to avoid duplicates)
 gh issue list --state open --limit 50
+
+# Create a GitHub Project (returns the new project number)
+gh project create --owner <owner> --title "<title>"
+
+# Add an issue to a project (use the issue URL returned by gh issue create)
+gh project item-add <project-number> --owner <owner> --url <issue-url>
+
+# List project fields (to find Status field ID and option IDs)
+gh project field-list <project-number> --owner <owner> --format json
+
+# Move a project item to a different status column
+# Requires: item ID (from item-add output), field ID, project ID, option ID
+gh project item-edit \
+  --id <item-node-id> \
+  --field-id <status-field-id> \
+  --project-id <project-node-id> \
+  --single-select-option-id <option-id>
 ```
+
+## Phase 5 — Create GitHub Project
+
+After all issues are created, create a GitHub Project board to track them:
+
+```bash
+# Get the repo owner
+OWNER=$(gh repo view --json owner --jq '.owner.login')
+
+# Create a project named after the spec (use the spec title / slug)
+gh project create --owner "$OWNER" --title "<Feature Name>"
+# Note the project number printed (e.g. "Created project 4")
+
+# Add every issue created in Phase 4 to the project
+# Use the URLs returned by each `gh issue create` call
+gh project item-add <project-number> --owner "$OWNER" --url <issue-url-1>
+gh project item-add <project-number> --owner "$OWNER" --url <issue-url-2>
+# … repeat for each issue
+```
+
+Print the project URL in the Phase 6 summary table.
+
+**If `gh project` is unavailable** (missing scope): tell the user to run `gh auth refresh -s project` and retry, then print the project creation commands for manual execution.
 
 ## Quality gates
 
@@ -83,6 +124,7 @@ gh issue list --state open --limit 50
 - Write specs to `specs/{slug}.md` — never overwrite, append `-2` on collision
 - Specs accumulate in `specs/` so agents can scan project history before starting new work
 - Include `Spec: specs/{slug}.md` in every issue body for back-linking
+- Every `/spi` run creates exactly one GitHub Project and links all issues to it
 
 ---
 
@@ -258,6 +300,25 @@ If this issue was flagged as conflicting with a later one, print:
     git push --force-with-lease
 ```
 
+### Phase 4d. Move project item to "In Review"
+
+After creating the PR, if the issue belongs to a GitHub Project, move it to the "In Review" column:
+
+```bash
+# Get the project node ID and Status field info
+gh project field-list <project-number> --owner "$OWNER" --format json \
+  | jq '.fields[] | select(.name == "Status")'
+
+# Find the "In Review" option ID from the field's options, then:
+gh project item-edit \
+  --id <item-node-id> \
+  --field-id <status-field-id> \
+  --project-id <project-node-id> \
+  --single-select-option-id <in-review-option-id>
+```
+
+If the project has no "In Review" column, skip this step — do not create columns or restructure the board.
+
 ### Phase 5 — Summary
 
 Print a table of everything that was done:
@@ -271,6 +332,8 @@ Print a table of everything that was done:
 | #530 | fix: discovery card scroll-clip | feat/issue-530-… | #537 | ✅ PR open |
 | #533 | feat: discoveries 2-col grid | feat/issue-533-… | #538 | ✅ PR open |
 …
+
+Project board: https://github.com/users/<owner>/projects/<N>
 
 Conflict rebases needed after merging:
   - Merge #537 → then rebase feat/issue-533-… onto main
